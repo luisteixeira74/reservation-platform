@@ -23,10 +23,6 @@ class ReservationController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        if (!$user) {
-            abort(401);
-        }
-
         $reservations = $user
             ->reservations()
             ->with('event')
