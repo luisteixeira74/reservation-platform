@@ -24,4 +24,12 @@ class Event extends Model
     {
         return $this->hasMany(Reservation::class);
     }
+
+    public function hasReservationFromUser(User $user): bool
+    {
+        return $this->reservations()
+            ->where('user_id', $user->id)
+            ->where('status', 'confirmed')
+            ->exists();
+    }
 }
