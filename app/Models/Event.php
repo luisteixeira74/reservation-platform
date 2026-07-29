@@ -19,4 +19,9 @@ class Event extends Model
         'event_date' => 'datetime',
         'active' => 'boolean',
     ];
+
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class);
+    }
 }
