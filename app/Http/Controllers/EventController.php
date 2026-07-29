@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Event;
 
 class EventController extends Controller
 {
@@ -11,7 +12,12 @@ class EventController extends Controller
      */
     public function index()
     {
-        //
+        $events = Event::query()
+            ->where('active', true)
+            ->orderBy('event_date')
+            ->get();
+
+        return view('events.index', compact('events'));
     }
 
     /**
