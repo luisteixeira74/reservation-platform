@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Event;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class EventController extends Controller
 {
@@ -12,10 +14,23 @@ class EventController extends Controller
      */
     public function index()
     {
-        $events = Event::query()
+        /** @var User|null $user */
+        $user = Auth::user();
+
+        $query = Event::query()
             ->where('active', true)
-            ->orderBy('event_date')
-            ->get();
+            ->orderBy('event_date');
+
+        if ($user) {
+            $query->withExists([
+                'reservations as already_reserved' => function ($query) use ($user) {
+                    $query->where('user_id', $user->id)
+                        ->where('status', 'confirmed');
+                },
+            ]);
+        }
+
+        $events = $query->paginate(10);
 
         return view('events.index', compact('events'));
     }

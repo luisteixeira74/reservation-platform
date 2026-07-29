@@ -35,6 +35,11 @@ Route::middleware('auth')->group(function () {
         [ReservationController::class, 'store']
     )->name('reservations.store');
 
+    Route::get(
+        '/my-reservations',
+        [ReservationController::class, 'index']
+    )->name('reservations.index');
+
 });
 
 require __DIR__.'/auth.php';

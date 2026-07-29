@@ -9,12 +9,31 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use App\Exceptions\AlreadyReservedException;
 use App\Exceptions\NoSeatsAvailableException;
+use Illuminate\View\View;
 
 class ReservationController extends Controller
 {
     public function __construct(
         private ReservationService $reservationService
     ) {
+    }
+
+    public function index(): View
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        if (!$user) {
+            abort(401);
+        }
+
+        $reservations = $user
+            ->reservations()
+            ->with('event')
+            ->latest()
+            ->get();
+
+        return view('reservations.index', compact('reservations'));
     }
 
     public function store(Event $event): RedirectResponse
