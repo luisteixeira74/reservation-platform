@@ -476,6 +476,42 @@ php artisan migrate
 php artisan serve
 ```
 
+# Application Flow
+
+The web application provides the following routes:
+
+| URL                       | Description              | Authentication |
+| ------------------------- | ------------------------ | -------------- |
+| `/events`                 | List available events    | Public         |
+| `/events/{event}/reserve` | Reserve an event         | Required       |
+| `/my-reservations`        | View user's reservations | Required       |
+| `/profile`                | Manage user profile      | Required       |
+
+## User Flow
+
+1. Access available events:
+   GET /events
+
+2. Authenticate with your account.
+
+3. Reserve an available event:
+   POST /events/{event}/reserve
+
+4. View your reservations:
+   GET /my-reservations
+
+## Authentication
+
+The application uses Laravel Breeze authentication.
+
+Available authentication features:
+
+- Register
+- Login
+- Logout
+- Password management
+- Profile management
+
 ---
 
 # Future Improvements
