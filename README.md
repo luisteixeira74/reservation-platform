@@ -411,6 +411,25 @@ Topics to explore:
 - Docker
 - PostgreSQL
 
+# Docker Environment
+
+The project uses Docker Compose to provide the database environment.
+
+Currently, PostgreSQL runs as a Docker container while the Laravel application runs locally using Artisan.
+
+Architecture:
+
+```text
+Laravel Application
+
+        |
+        |
+        ↓
+
+PostgreSQL 17
+(Docker Container)
+```
+
 ## Installation
 
 Clone repository:
@@ -449,6 +468,14 @@ Start development server:
 php artisan serve
 ```
 
+````md
+## Start database
+
+Start PostgreSQL container:
+
+```bash
+docker compose up -d
+
 ---
 
 # Future Improvements
@@ -468,3 +495,9 @@ php artisan serve
 Backend developer focused on PHP/Laravel and Go.
 
 This project was created as a portfolio application to demonstrate backend engineering practices with Laravel.
+```
+````
+
+```
+
+```
