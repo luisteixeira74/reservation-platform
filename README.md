@@ -456,25 +456,25 @@ Generate application key:
 php artisan key:generate
 ```
 
-Run migrations:
-
-```bash
-php artisan migrate
-```
-
-Start development server:
-
-```bash
-php artisan serve
-```
-
-````md
 ## Start database
 
 Start PostgreSQL container:
 
 ```bash
 docker compose up -d
+```
+
+## Run migrations
+
+```bash
+php artisan migrate
+```
+
+## Start development server:
+
+```bash
+php artisan serve
+```
 
 ---
 
@@ -495,8 +495,14 @@ docker compose up -d
 Backend developer focused on PHP/Laravel and Go.
 
 This project was created as a portfolio application to demonstrate backend engineering practices with Laravel.
+
 ```
-````
+
+```
+
+```
+
+```
 
 ```
 
