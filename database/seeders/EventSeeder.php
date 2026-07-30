@@ -38,5 +38,7 @@ class EventSeeder extends Seeder
             'available_seats' => 1200,
             'active' => true,
         ]);
+
+        Event::factory(30)->create();
     }
 }

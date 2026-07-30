@@ -1,0 +1,32 @@
+<?php
+
+namespace Database\Factories;
+
+use App\Models\Event;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends Factory<Event>
+ */
+class EventFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'name' => fake()->sentence(3),
+            'description' => fake()->paragraph(),
+            'event_date' => fake()->dateTimeBetween(
+                '2026-09-01',
+                '2027-01-01'
+            ),
+            'total_seats' => 1000,
+            'available_seats' => 1000,
+            'active' => true,
+        ];
+    }
+}

@@ -476,6 +476,26 @@ php artisan migrate
 php artisan serve
 ```
 
+## Demo Data
+
+The project includes seed data for development.
+
+Run:
+
+php artisan db:seed
+
+This creates sample events to demonstrate:
+
+- Event listing
+- Pagination
+- Reservation flow
+
+## Access de Application Web
+
+```bash
+http://localhost:8000/events
+```
+
 # Application Flow
 
 The web application provides the following routes:

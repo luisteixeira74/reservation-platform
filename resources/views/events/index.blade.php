@@ -88,6 +88,10 @@
 
             @endforeach
 
+            <div class="mt-6">
+                {{ $events->links() }}
+            </div>
+
         </div>
 
     </div>
