@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use App\Exceptions\AlreadyReservedException;
 use App\Exceptions\NoSeatsAvailableException;
+use App\Exceptions\EventNotAvailableException;
 
 class ReservationService
 {
@@ -21,6 +22,10 @@ class ReservationService
     public function reserve(User $user, Event $event): Reservation
     {
         return DB::transaction(function () use ($user, $event) {
+
+            if (!$event->active) {
+                throw new EventNotAvailableException();
+            }
 
             if ($event->available_seats <= 0) {
                 throw new NoSeatsAvailableException(
