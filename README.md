@@ -361,11 +361,28 @@ Available endpoints:
 
 ```
 POST /api/login
+```
+
+```bash
+curl -X POST \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"email@email.com","password":"123456"}' \
+  http://localhost:8000/api/login
+```
 
 GET /api/events
 
 POST /api/events/{event}/reservations
 
+```bash
+  curl -i -X POST \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer 1|xxxxxxxxxxxxxxxx" \
+  http://localhost:8000/api/events/11/reservations
+```
+
+```
 GET /api/my-reservations
 ```
 
@@ -565,14 +582,6 @@ Available authentication features:
 Backend developer focused on PHP/Laravel and Go.
 
 This project was created as a portfolio application to demonstrate backend engineering practices with Laravel.
-
-```
-
-```
-
-```
-
-```
 
 ```
 
