@@ -77,6 +77,11 @@ Business rules:
 - PHP 8.3
 - Laravel 13
 - Eloquent ORM
+- Docker Compose
+- Breeze
+- Blade
+- Paginação
+- Tratamento de N+1 (withExists())
 
 ## Database
 
@@ -474,6 +479,12 @@ php artisan migrate
 
 ```bash
 php artisan serve
+```
+
+## Start front build:
+
+```bash
+npm run dev
 ```
 
 ## Demo Data

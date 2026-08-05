@@ -11,7 +11,7 @@
 
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
-            @foreach ($reservations as $reservation)
+            @forelse ($reservations as $reservation)
 
                 <div class="bg-white p-6 mb-4 shadow rounded">
 
@@ -31,8 +31,20 @@
 
                 </div>
 
-            @endforeach
+            @empty
 
+                <div class="bg-white p-6 shadow rounded text-center">
+                    <p class="text-gray-600">
+                        Você ainda não possui reservas.
+                    </p>
+
+                    <a href="{{ route('events.index') }}"
+                    class="mt-4 inline-block text-blue-600 hover:underline">
+                        Ver eventos disponíveis
+                    </a>
+                </div>
+
+            @endforelse
 
         </div>
 
