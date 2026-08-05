@@ -324,37 +324,40 @@ Benefits:
 
 # Testing
 
-Planned implementation using **Pest**.
+The project uses **Pest** for automated testing.
 
-The main scenarios to cover:
+Implemented coverage includes:
 
-## Reservation Tests
+- Authentication flows
+- Public event listing API
+- Reservation API endpoints
+- Protected API endpoints
+- Reservation business rules
+- Database consistency
 
-- User can reserve an event
-- Available seats are decremented
-- User cannot reserve twice
-- Sold out events cannot be reserved
+The tests use:
 
-## Feature Tests
-
-- Authentication flow
-- Event listing
-- Reservation endpoints
-- Authorization rules
+- SQLite in-memory database
+- RefreshDatabase
+- Feature tests
+- Service layer tests
 
 ---
 
-# REST API Roadmap
+# REST API
 
-The next evolution of the project is exposing the same domain through a REST API.
+The reservation domain is exposed through a REST API using Laravel Sanctum.
 
-Planned stack:
+The API layer shares the same business rules used by the Web application through the ReservationService.
 
-- Laravel Sanctum
+Implemented:
+
+- Laravel Sanctum authentication
 - API Resources
 - Feature tests
+- Protected routes
 
-Planned endpoints:
+Available endpoints:
 
 ```
 POST /api/login
