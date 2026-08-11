@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use App\Exceptions\AlreadyReservedException;
 use App\Exceptions\NoSeatsAvailableException;
 use App\Exceptions\EventNotAvailableException;
+use Illuminate\Support\Facades\Log;
 
 class ReservationService
 {
@@ -51,6 +52,12 @@ class ReservationService
             ]);
 
             $event->decrement('available_seats');
+
+            Log::info('Reservation created', [
+                'user_id' => $user->id,
+                'event_id' => $event->id,
+                'reservation_id' => $reservation->id,
+            ]);
 
             return $reservation;
         });
