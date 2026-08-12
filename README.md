@@ -442,7 +442,9 @@ Database Transaction
     ↓
 Reservation + Seat Update
     ↓
-afterCommit()
+Commit
+    ↓
+afterCommit() → Dispatch Job
     ↓
 Redis Queue
     ↓
