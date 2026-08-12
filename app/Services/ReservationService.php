@@ -10,6 +10,7 @@ use App\Exceptions\AlreadyReservedException;
 use App\Exceptions\NoSeatsAvailableException;
 use App\Exceptions\EventNotAvailableException;
 use Illuminate\Support\Facades\Log;
+use App\Jobs\ReservationCreatedJob;
 
 class ReservationService
 {
@@ -58,6 +59,9 @@ class ReservationService
                 'event_id' => $event->id,
                 'reservation_id' => $reservation->id,
             ]);
+
+            ReservationCreatedJob::dispatch($reservation->id)
+                ->afterCommit();
 
             return $reservation;
         });

@@ -7,7 +7,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Exceptions\AlreadyReservedException;
 use App\Exceptions\NoSeatsAvailableException;
 use App\Exceptions\EventNotAvailableException;
-use App\Models\Reservation;
+use App\Jobs\ReservationCreatedJob;
+use Illuminate\Support\Facades\Queue;
 
 uses(RefreshDatabase::class);
 
@@ -43,6 +44,28 @@ it('creates a reservation successfully', function () {
         'event_id' => $event->id, 
         'status' => 'confirmed',
     ]);
+});
+
+it('dispatches reservation notification job', function () {
+    Queue::fake();
+
+    $user = User::factory()->create();
+
+    $event = Event::factory()->create([
+        'available_seats' => 10,
+        'total_seats' => 10,
+    ]);
+
+    $service = app(ReservationService::class);
+
+    $reservation = $service->reserve($user, $event);
+
+    Queue::assertPushed(
+        ReservationCreatedJob::class,
+        function ($job) use ($reservation) {
+            return $job->reservationId === $reservation->id;
+        }
+    );
 });
 
 it('throws exception when user already reserved the event', function () {

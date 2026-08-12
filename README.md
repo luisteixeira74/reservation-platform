@@ -26,7 +26,11 @@ The project was designed to demonstrate real-world backend concerns:
 - Transactions
 - Query optimization
 - Automated testing
-- REST API evolution
+- REST API
+- Asynchronous processing
+- Background jobs and queues
+- Redis as queue backend
+- User notifications
 
 ---
 
@@ -67,6 +71,26 @@ Business rules:
 - A user cannot reserve the same event twice.
 - Users cannot reserve events without available seats.
 - Seat availability is updated together with reservation creation.
+
+### Asynchronous Notifications
+
+Reservation confirmation notifications are processed asynchronously using Laravel Jobs and Queues.
+
+Flow:
+
+Reservation
+↓
+Database Transaction
+↓
+afterCommit()
+↓
+Redis Queue
+↓
+Laravel Worker
+↓
+ReservationCreatedJob
+↓
+Notification
 
 ---
 
@@ -111,7 +135,11 @@ Current structure:
 app/
 
 ├── Http/
-│   └── Controllers/
+│   ├── Controllers/
+│   └── Resources/
+│
+├── Jobs/
+│   └── ReservationCreatedJob.php
 │
 ├── Models/
 │
@@ -131,36 +159,37 @@ Reservation creation:
 
 ```
 User
-
  |
-
  v
-
 ReservationController
-
  |
-
  v
-
 ReservationService
-
  |
-
  +----------------+
  | Business Rules |
  +----------------+
-
  |
-
  v
-
 Database Transaction
-
  |
-
  v
-
 Reservation + Event Seats Update
+ |
+ v
+afterCommit()
+ |
+ v
+ReservationCreatedJob
+ |
+ v
+Redis Queue
+ |
+ v
+Laravel Worker
+ |
+ v
+Notification
 ```
 
 ---
@@ -334,6 +363,9 @@ Implemented coverage includes:
 - Protected API endpoints
 - Reservation business rules
 - Database consistency
+- ReservationCreatedJob
+- Queue dispatch verification using Queue::fake()
+- Notification creation
 
 The tests use:
 
@@ -396,34 +428,30 @@ using the same business rules.
 
 ---
 
-# Cache Strategy Roadmap
+# Redis / Queues
 
-Redis will be introduced for read optimization.
+Redis is used as the Laravel queue backend for asynchronous processing.
 
-Possible use cases:
+Reservation confirmation notifications are dispatched after the reservation
+transaction is successfully committed.
 
 ```
-Events listing
-
-        |
-
-        v
-
-Redis Cache
-
-        |
-
-        v
-
-PostgreSQL
+Reservation
+    ↓
+Database Transaction
+    ↓
+Reservation + Seat Update
+    ↓
+afterCommit()
+    ↓
+Redis Queue
+    ↓
+Laravel Worker
+    ↓
+ReservationCreatedJob
+    ↓
+Notification
 ```
-
-Topics to explore:
-
-- Cache Aside pattern
-- TTL
-- Cache invalidation
-- Performance comparison
 
 ---
 
@@ -446,13 +474,12 @@ Architecture:
 
 ```text
 Laravel Application
-
-        |
-        |
-        ↓
-
-PostgreSQL 17
-(Docker Container)
+       |
+       +----------------+
+       |                |
+       v                v
+PostgreSQL            Redis
+(Docker)             (Docker)
 ```
 
 ## Installation
@@ -501,7 +528,17 @@ php artisan migrate
 php artisan serve
 ```
 
-## Start front build:
+## Queue Worker
+
+The application uses Redis as the queue backend.
+
+Start the queue worker:
+
+```bash
+php artisan queue:work redis
+```
+
+## Start Frontend build
 
 ```bash
 npm run dev
@@ -567,13 +604,10 @@ Available authentication features:
 
 # Future Improvements
 
-- [ ] Pest automated tests
-- [ ] Laravel Sanctum authentication API
-- [ ] API Resources
-- [ ] Redis caching
-- [ ] Docker Compose production setup
+- [ ] Vue.js notification component
+- [ ] Mark notifications as read
+- [ ] Queue Worker managed by Docker Compose
 - [ ] API documentation
-- [ ] Queue based notifications
 
 ---
 
