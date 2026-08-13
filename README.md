@@ -10,8 +10,6 @@ The application allows users to browse events, reserve seats, and manage their r
 
 # Overview
 
-Reservation Platform manages events with limited capacity and allows authenticated users to reserve available seats.
-
 The main domain concepts are:
 
 - Users
@@ -21,15 +19,11 @@ The main domain concepts are:
 The project was designed to demonstrate real-world backend concerns:
 
 - Authentication
-- Business rules
-- Database relationships
-- Transactions
+- Business rules and database consistency
 - Query optimization
 - Automated testing
 - REST API
-- Asynchronous processing
-- Background jobs and queues
-- Redis as queue backend
+- Jobs and queues
 - User notifications
 
 ---
@@ -76,22 +70,6 @@ Business rules:
 
 Reservation confirmation notifications are processed asynchronously using Laravel Jobs and Queues.
 
-Flow:
-
-Reservation
-↓
-Database Transaction
-↓
-afterCommit()
-↓
-Redis Queue
-↓
-Laravel Worker
-↓
-ReservationCreatedJob
-↓
-Notification
-
 ---
 
 # Tech Stack
@@ -116,6 +94,7 @@ Notification
 - Blade Templates
 - Laravel Breeze
 - Tailwind CSS
+- Vue
 
 ## Development
 
@@ -153,79 +132,16 @@ app/
 
 ---
 
-# Domain Flow
-
-Reservation creation:
-
-```
-User
- |
- v
-ReservationController
- |
- v
-ReservationService
- |
- +----------------+
- | Business Rules |
- +----------------+
- |
- v
-Database Transaction
- |
- v
-Reservation + Event Seats Update
- |
- v
-afterCommit()
- |
- v
-ReservationCreatedJob
- |
- v
-Redis Queue
- |
- v
-Laravel Worker
- |
- v
-Notification
-```
-
----
-
-# Database Model
+## Database Model
 
 Main relationships:
 
-```
-User
+User 1:N Reservation
+Event 1:N Reservation
 
- 1
- |
- |
- N
-
-Reservation
-
- N
- |
- |
- 1
-
-Event
-```
-
-## User
-
-A user can have many reservations.
-
-```php
-public function reservations()
-{
-    return $this->hasMany(Reservation::class);
-}
-```
+- A user can have many reservations.
+- A reservation belongs to a user and an event.
+- An event can have many reservations.
 
 ## Event
 
@@ -252,54 +168,13 @@ A reservation belongs to:
 
 A user cannot reserve the same event more than once.
 
-Example:
-
-```
-User
- |
- +-- Reservation
-       |
-       Event
-
-Attempting another reservation
-for the same event is blocked.
-```
-
 ## Seat Availability
 
 Reservations validate available capacity before creating a reservation.
 
-The operation updates:
-
-```
-Reservation creation
-
-+
-
-Available seats decrement
-```
-
-inside a database transaction.
-
----
-
 # Database Transactions
 
-Reservation creation uses transactions to guarantee consistency.
-
-Example scenario:
-
-```
-Create reservation
-
-+
-
-Decrease available seats
-```
-
-Both operations must succeed together.
-
-If one fails, the entire operation is rolled back.
+Reservation creation and seat decrement are executed inside the same database transaction, ensuring both operations succeed or are rolled back together.
 
 ---
 
@@ -335,19 +210,9 @@ This reduces unnecessary database queries and keeps the view layer focused on pr
 
 ---
 
-# Pagination
+## Pagination
 
-Event listing uses Laravel pagination:
-
-```php
-Event::paginate(10);
-```
-
-Benefits:
-
-- Avoid loading all records
-- Better performance
-- Ready for large datasets
+Event listing uses Laravel pagination with `paginate(10)` to avoid loading all records at once.
 
 ---
 
@@ -378,62 +243,20 @@ The tests use:
 
 # REST API
 
-The reservation domain is exposed through a REST API using Laravel Sanctum.
-
-The API layer shares the same business rules used by the Web application through the ReservationService.
-
-Implemented:
-
-- Laravel Sanctum authentication
-- API Resources
-- Feature tests
-- Protected routes
+The API exposes the reservation domain through Laravel Sanctum.
 
 Available endpoints:
 
-```
-POST /api/login
-```
-
-```bash
-curl -X POST \
-  -H "Accept: application/json" \
-  -H "Content-Type: application/json" \
-  -d '{"email":"email@email.com","password":"123456"}' \
-  http://localhost:8000/api/login
-```
-
-GET /api/events
-
-POST /api/events/{event}/reservations
-
-```bash
-  curl -i -X POST \
-  -H "Accept: application/json" \
-  -H "Authorization: Bearer 1|xxxxxxxxxxxxxxxx" \
-  http://localhost:8000/api/events/11/reservations
-```
-
-```
-GET /api/my-reservations
-```
-
-The goal is to support:
-
-- Web applications
-- Mobile clients
-- External integrations
-
-using the same business rules.
+| Method | Endpoint                           | Description              |
+| ------ | ---------------------------------- | ------------------------ |
+| POST   | `/api/login`                       | Authenticate user        |
+| GET    | `/api/events`                      | List events              |
+| POST   | `/api/events/{event}/reservations` | Create reservation       |
+| GET    | `/api/my-reservations`             | List user's reservations |
 
 ---
 
 # Redis / Queues
-
-Redis is used as the Laravel queue backend for asynchronous processing.
-
-Reservation confirmation notifications are dispatched after the reservation
-transaction is successfully committed.
 
 ```
 Reservation
@@ -463,26 +286,12 @@ Notification
 
 - PHP 8.3+
 - Composer
+- Node.js / npm
 - Docker
-- PostgreSQL
 
 # Docker Environment
 
-The project uses Docker Compose to provide the database environment.
-
-Currently, PostgreSQL runs as a Docker container while the Laravel application runs locally using Artisan.
-
-Architecture:
-
-```text
-Laravel Application
-       |
-       +----------------+
-       |                |
-       v                v
-PostgreSQL            Redis
-(Docker)             (Docker)
-```
+The project uses Docker Compose for PostgreSQL and Redis, while Laravel runs locally using Artisan.
 
 ## Installation
 
@@ -540,9 +349,10 @@ Start the queue worker:
 php artisan queue:work redis
 ```
 
-## Start Frontend build
+## Frontend Development
 
 ```bash
+npm install
 npm run dev
 ```
 
@@ -560,56 +370,11 @@ This creates sample events to demonstrate:
 - Pagination
 - Reservation flow
 
-## Access de Application Web
+## Access Web Application
 
 ```bash
 http://localhost:8000/events
 ```
-
-# Application Flow
-
-The web application provides the following routes:
-
-| URL                       | Description              | Authentication |
-| ------------------------- | ------------------------ | -------------- |
-| `/events`                 | List available events    | Public         |
-| `/events/{event}/reserve` | Reserve an event         | Required       |
-| `/my-reservations`        | View user's reservations | Required       |
-| `/profile`                | Manage user profile      | Required       |
-
-## User Flow
-
-1. Access available events:
-   GET /events
-
-2. Authenticate with your account.
-
-3. Reserve an available event:
-   POST /events/{event}/reserve
-
-4. View your reservations:
-   GET /my-reservations
-
-## Authentication
-
-The application uses Laravel Breeze authentication.
-
-Available authentication features:
-
-- Register
-- Login
-- Logout
-- Password management
-- Profile management
-
----
-
-# Future Improvements
-
-- [ ] Vue.js notification component
-- [ ] Mark notifications as read
-- [ ] Queue Worker managed by Docker Compose
-- [ ] API documentation
 
 ---
 
@@ -618,7 +383,3 @@ Available authentication features:
 Backend developer focused on PHP/Laravel and Go.
 
 This project was created as a portfolio application to demonstrate backend engineering practices with Laravel.
-
-```
-
-```
