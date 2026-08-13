@@ -63,7 +63,7 @@
 
             @auth
 
-                <div class="hidden sm:flex sm:items-center sm:ms-6">
+                <div class="hidden sm:flex sm:items-center sm:ms-6 space-x-4">
 
                     <div id="notification-bell"></div>
 

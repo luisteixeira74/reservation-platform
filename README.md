@@ -70,6 +70,18 @@ Business rules:
 
 Reservation confirmation notifications are processed asynchronously using Laravel Jobs and Queues.
 
+The notification flow is presented in a Vue.js notification component that provides:
+
+- Unread notification badge
+- Lightweight polling for unread notifications
+- Loading state
+- Mark notifications as read
+- Reactive unread counter
+
+#### Notification Center
+
+![Notification Bell](docs/images/notification-bell-comparison.png)
+
 ---
 
 # Tech Stack
