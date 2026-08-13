@@ -4,6 +4,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReservationController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\NotificationController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -40,6 +41,20 @@ Route::middleware('auth')->group(function () {
         [ReservationController::class, 'index']
     )->name('reservations.index');
 
+    Route::patch('/notifications/{notification}/read', [
+        NotificationController::class,
+        'markAsRead',
+    ]);
+
+    Route::get('/notifications', [
+        NotificationController::class,
+        'index'
+    ]);
+
+    Route::get('/notifications/unread-count', [
+        NotificationController::class,
+        'unreadCount'
+    ]);
 });
 
 require __DIR__.'/auth.php';
