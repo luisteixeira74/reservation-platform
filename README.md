@@ -243,6 +243,8 @@ Implemented coverage includes:
 - ReservationCreatedJob
 - Queue dispatch verification using Queue::fake()
 - Notification creation
+- Notification endpoints
+- Notification authorization
 
 The tests use:
 
@@ -250,6 +252,12 @@ The tests use:
 - RefreshDatabase
 - Feature tests
 - Service layer tests
+
+Run the test suite:
+
+```bash
+php artisan test
+```
 
 ---
 
