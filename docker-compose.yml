@@ -1,24 +1,100 @@
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_DATABASE: reservation
+      DB_USERNAME: reservation
+      DB_PASSWORD: reservation
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - laravel_storage:/var/www/html/storage
+      - laravel_cache:/var/www/html/bootstrap/cache
+
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    image: reservation-platform-nginx:local
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - app
+
   postgres:
     image: postgres:17
-    container_name: reservation-postgres
     restart: unless-stopped
-
     environment:
       POSTGRES_DB: reservation
       POSTGRES_USER: reservation
       POSTGRES_PASSWORD: reservation
-
     ports:
       - "5432:5432"
-
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U reservation -d reservation"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  queue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_DATABASE: reservation
+      DB_USERNAME: reservation
+      DB_PASSWORD: reservation
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+    command:
+      [
+        "php",
+        "artisan",
+        "queue:work",
+        "redis",
+        "--sleep=3",
+        "--tries=3",
+        "--timeout=90",
+      ]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
   redis:
     image: redis:7
+    restart: unless-stopped
     ports:
       - "6379:6379"
 
 volumes:
   postgres_data:
+  laravel_storage:
+  laravel_cache:
