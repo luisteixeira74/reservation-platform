@@ -1,4 +1,17 @@
-# Etapa imagem da aplicação Laravel.
+
+# Compila os assets do frontend.
+FROM node:22-bookworm-slim AS frontend
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY . .
+RUN npm run build
+
+
+# Imagem da aplicação Laravel.
 FROM php:8.3-fpm-bookworm
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -30,6 +43,10 @@ RUN composer install \
     --no-scripts
 
 COPY --chown=www-data:www-data . .
+
+# Usa exatamente os assets compilados no estágio frontend.
+COPY --from=frontend --chown=www-data:www-data \
+    /app/public/build/ /var/www/html/public/build/
 
 RUN mkdir -p storage/framework/cache \
     storage/framework/sessions \
