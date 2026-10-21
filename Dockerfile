@@ -1,7 +1,6 @@
-
+# Etapa imagem da aplicação Laravel.
 FROM php:8.3-fpm-bookworm
 
-# Dependências necessárias para compilar extensões PHP.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     unzip \
@@ -16,15 +15,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Composer oficial.
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
 WORKDIR /var/www/html
 
-# Copia primeiro os manifests para aproveitar o cache do Docker.
 COPY composer.json composer.lock ./
 
-# Dependências de produção.
 RUN composer install \
     --no-dev \
     --prefer-dist \
@@ -33,10 +29,8 @@ RUN composer install \
     --optimize-autoloader \
     --no-scripts
 
-# Copia o código da aplicação.
 COPY --chown=www-data:www-data . .
 
-# Gera os manifests dos pacotes instalados na imagem.
 RUN mkdir -p storage/framework/cache \
     storage/framework/sessions \
     storage/framework/views \
