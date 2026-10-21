@@ -347,10 +347,14 @@ Start PostgreSQL container:
 docker compose up -d
 ```
 
-## Run migrations
+## Run migrations & Seed
 
 ```bash
 php artisan migrate
+```
+
+```bash
+php artisan db:seed
 ```
 
 ## Start development server:
